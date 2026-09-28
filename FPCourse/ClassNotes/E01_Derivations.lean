@@ -502,6 +502,10 @@ def meatToString : Chicken ⊕ Fish → String
 
 -- #1: PROVE: Chicken ⊕ Fish → Fish ⊕ Chicken
 
+example : Chicken ⊕ Fish → Fish ⊕ Chicken
+| Sum.inl c => Sum.inr c
+| Sum.inr f => Sum.inl f
+
 /- @@@
 #2: PROVE: that someone who ordered "Fish, and either
 Rice or Potato" should be satisfied to be served
@@ -514,7 +518,7 @@ and Fish."
 @@@-/
 
 example : Fish × (Rice ⊕ Potato) → (Rice ⊕ Potato) × Fish
-| _ => sorry    -- replace this line
+| (f, rop) => (rop, f)  -- replace this line
 
 /- @@@
 That's just commutativity of × again. We proved it by
@@ -543,13 +547,16 @@ example, then in general.
 example :
   Fish × (Rice ⊕ Potato) → Fish × Rice ⊕ Fish × Potato
   | (f, rop) =>
-      sorry
+      match rop with
+      | Sum.inl r => Sum.inl (f, r)
+      | Sum.inr p => Sum.inr (f, p)
   -- you've got fish; now does rop hold rice or potato?
 
 -- #4 Prove the other direction too.
 example :
   Fish × Rice ⊕ Fish × Potato → Fish × (Rice ⊕ Potato)
-  | _ => sorry    -- replace line with your code
+  | Sum.inl (f, r) => (f, Sum.inl r)
+  | Sum.inr (f, p) => (f, Sum.inr p)   -- replace line with your code
 
 
 /- @@@
@@ -573,13 +580,19 @@ Infix notation for the type, *Or P Q*, is *P ∨ Q*.
 -- #5: PROVE: `Or` (∨) is commutative *in general*
 
 example {P Q : Prop} : P ∨ Q → Q ∨ P
-| _ => sorry  -- replace with your code
+| Or.inl p => Or.inr p
+| Or.inr q => Or.inl q  -- replace with your code
 
 -- #6: Prove ∧ distributes over or in the usual way
 example {P Q R : Prop } : P ∧ (Q ∨ R) → P ∧ Q ∨ P ∧ R
-| _ => sorry  -- replace this line with your code
+| ⟨p, qr⟩ =>
+    match qr with
+    | Or.inl q => Or.inl ⟨p, q⟩
+    | Or.inr r => Or.inr ⟨p, r⟩ -- replace this line with your code
 
 -- #7: Prove that ∨ is associative. It's left associative
 -- so note that P ∨ Q ∨ R is read as (P ∨ Q) ∨ R.
 example {P Q R : Prop } :  P ∨ Q ∨ R → (P ∨ Q) ∨ R
-| _ => sorry  -- replace this line with your code
+| Or.inl p           => Or.inl (Or.inl p)
+| Or.inr (Or.inl q)  => Or.inl (Or.inr q)
+| Or.inr (Or.inr r)  => Or.inr r -- replace this line with your code
